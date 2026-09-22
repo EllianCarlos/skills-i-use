@@ -1,0 +1,72 @@
+{
+  "skill_name": "decision-tracker",
+  "evals": [
+    {
+      "id": 0,
+      "name": "notification-rewrite",
+      "prompt": "ok i'm about to start the rewrite of our notification service and there are like 5 things i keep going back and forth on \u2014 queue vs direct http to the providers, whether we keep the old template format, do we do per-tenant rate limits now or later, postgres or dynamo for the delivery log, and whether the retry logic lives in our service or in the consumer. i want to sit down and decide all of them in one go and have a record, because my TL is going to ask me why on every single one. can you set that up for me",
+      "expected_output": "A full-mode tracker: decisions.json with 5 cards, each with a closed question, short context, impact, cost in concrete units, reversibility, options with pros/cons where the options genuinely compete, and a recommendation. Then a markdown log under docs/decisions/ or ~/decisions/.",
+      "files": [],
+      "assertions": [
+        "A durable markdown decision record exists on disk",
+        "The record states a decision for every question asked",
+        "The record keeps the rationale or note alongside each decision",
+        "An HTML page was produced for the user to answer in",
+        "The reply to the user names the exact path of the saved record",
+        "Exactly 5 decision cards, one per question the user listed",
+        "Every card states what the decision changes downstream (impact)",
+        "Every card states a cost in concrete units or an explicit unknown",
+        "Every card with competing options lists both pros and cons for each",
+        "Every card states reversibility",
+        "At least 4 of the 5 cards carry a recommendation",
+        "Card context stays at three sentences or fewer",
+        "Full mode was used, not fast mode"
+      ]
+    },
+    {
+      "id": 1,
+      "name": "cr-review-queue",
+      "prompt": "i've got 9 review comments on CR 5581 to work through and honestly most of them are just yes/no. i don't want to type anything. just throw them at me one at a time and let me hit a key, then write down what i said so i can paste it into the CR reply after",
+      "expected_output": "Fast mode. references/fast-mode.md read. decisions.json with mode fast and ~9 short binary questions, each phrased so Yes is the action. Run with --mode fast. A -fast.md log with the answer table.",
+      "files": [],
+      "assertions": [
+        "A durable markdown decision record exists on disk",
+        "The record states a decision for every question asked",
+        "The record keeps the rationale or note alongside each decision",
+        "An HTML page was produced for the user to answer in",
+        "The reply to the user names the exact path of the saved record",
+        "Fast mode was selected",
+        "All 9 review comments became questions",
+        "No question carries options, pros or cons (wrong shape for fast mode)",
+        "Every question is short enough to read in two seconds (<=14 words)",
+        "The reply teaches the real key bindings: j yes, f no, k skip",
+        "The log is written to a separate -fast.md file",
+        "The log records which key produced each answer",
+        "Skipped questions are repeated under 'Still open'"
+      ]
+    },
+    {
+      "id": 2,
+      "name": "design-doc-open-questions",
+      "prompt": "here's the design doc for the invoice matcher: WORKSPACE/inputs/matcher-design.md . it has a bunch of TBDs and open questions scattered through it, some are real architecture calls and a couple are just 'do we do this or not'. pull them all out and let me decide them properly, and save the answers somewhere i'll actually find them again",
+      "expected_output": "Reads the doc. Extracts the 4 TBDs plus the 4 smaller deferred items. Puts the architecture calls in full mode with the doc's real costs (4 dev-days, $900/month, 6 dev-days, 3 weeks) carried across, and routes the small binary ones to fast mode, or explains the split. Does not invent a cost for the confidence threshold, which the doc says is unknown.",
+      "files": [
+        "inputs/matcher-design.md"
+      ],
+      "assertions": [
+        "A durable markdown decision record exists on disk",
+        "The record states a decision for every question asked",
+        "The record keeps the rationale or note alongside each decision",
+        "An HTML page was produced for the user to answer in",
+        "The reply to the user names the exact path of the saved record",
+        "All four explicit TBDs from the doc became decisions",
+        "All four smaller deferred items from the doc became decisions",
+        "The doc's real numbers are carried across, not restated vaguely",
+        "The PII and retention risk is named on the payload-logging decision",
+        "The batch is split across both modes, or the split is explained",
+        "At least 8 decisions were extracted from the doc",
+        "No number was invented for the confidence threshold, which the doc marks unknown"
+      ]
+    }
+  ]
+}
