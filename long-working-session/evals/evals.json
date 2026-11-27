@@ -1,0 +1,52 @@
+{
+  "skill_name": "long-working-session",
+  "evals": [
+    {
+      "id": 0,
+      "name": "start-long-migration",
+      "prompt": "heads up, this one is going to be long. we're moving all 6 billing cron jobs to the new scheduler, one PR per job, then a prod cutover and cleaning up the old crons. probably takes a couple of days and a few sessions. set yourself up so you don't lose track",
+      "expected_output": "A STATUS.md at the project root containing only an optional goal heading and one table with Item, Pointer, Status, Next columns; one row per job plus cutover and cleanup, all todo; the file excluded from git via .git/info/exclude; the reply shows the table and the absolute path.",
+      "files": [],
+      "assertions": [
+        "A markdown tracker file exists on disk at a stable, non-temp path",
+        "The file holds a single table, with at most a one-line heading",
+        "The table columns are Item, Pointer, Status and Next",
+        "There is one row per job, plus rows for the cutover and the cleanup",
+        "Every status is a word from the skill's status set",
+        "Item names are short, two to five words",
+        "The tracker was not committed; it was added to .git/info/exclude when inside a git repo",
+        "The reply names the absolute path of the tracker"
+      ]
+    },
+    {
+      "id": 1,
+      "name": "join-after-compaction",
+      "prompt": "we've been at this for hours and you've compacted twice already, I can tell you're forgetting stuff. start tracking the work in a status file from now on",
+      "expected_output": "The agent rebuilds the table from the compaction summary, the conversation, git state and open PRs; rows it cannot confirm are marked unknown with verify in Next; it checks live state with cheap reads before setting statuses; it shows the table and path and names the rows still unknown.",
+      "files": [],
+      "assertions": [
+        "The agent looked for an existing tracker before creating one",
+        "Rows were built from evidence (conversation, compaction summary, git, PRs), not invented",
+        "No row is marked done without the agent having seen it finished",
+        "Unconfirmed rows use the unknown status",
+        "The agent ran at least one live read (git, gh, or a status call) to confirm a row",
+        "The reply names any rows still unknown",
+        "The reply names the absolute path of the tracker"
+      ]
+    },
+    {
+      "id": 2,
+      "name": "update-on-state-change",
+      "prompt": "ok PR for the invoice job is up, here it is https://github.com/acme/billing/pull/412. move on to the refund job",
+      "files": ["STATUS.md"],
+      "expected_output": "Before replying, the agent edits the existing invoice-job row in place: Pointer gets the PR link, Status becomes review. The refund-job row becomes doing. No duplicate rows are added.",
+      "assertions": [
+        "The tracker was edited before the reply",
+        "The invoice job row now has the PR link as its pointer",
+        "The invoice job row status is review",
+        "The refund job row status is doing",
+        "No second row was appended for either item"
+      ]
+    }
+  ]
+}
