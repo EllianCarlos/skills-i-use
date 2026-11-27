@@ -1,0 +1,50 @@
+{
+  "skill_name": "work-status-summary",
+  "evals": [
+    {
+      "id": 0,
+      "name": "where-are-we-with-tracker",
+      "prompt": "back from lunch. where are we and what's next?",
+      "files": ["STATUS.md"],
+      "expected_output": "The agent reads STATUS.md, checks live state for every row not done or dropped (gh pr view, git log, job status), corrects the tracker, then replies with a short summary, the table ordered by attention, a Needs you section if anything needs the user, an ordered list of next steps, and a Not checked line for anything it could not read.",
+      "assertions": [
+        "The agent read the existing tracker first",
+        "Live state was checked for every row that is not done or dropped",
+        "The tracker file was updated where live state differed",
+        "The reply opens with a summary of three sentences or fewer",
+        "The reply includes a table with Item, Pointer, Status and Next columns",
+        "Blocked and review rows appear before done rows",
+        "The reply includes an ordered list of three to seven next steps",
+        "Any item whose live state could not be read is listed under Not checked",
+        "No merge, retry, close or re-run was performed"
+      ]
+    },
+    {
+      "id": 1,
+      "name": "no-tracker-catch-up",
+      "prompt": "summarize everything we've done in this session and what's left, I need to hand it off to Ana tomorrow",
+      "files": [],
+      "expected_output": "With no tracker on disk, the agent builds items from the conversation, git state and open PRs, verifies them live, and writes the report as a handoff note with links intact. It offers to create a tracker with long-working-session rather than creating one unasked.",
+      "assertions": [
+        "Items were built from the conversation and repo state, one per deliverable",
+        "Statuses come from live reads or are marked as not checked",
+        "Pointers are clickable links or absolute file paths",
+        "The note includes next steps a cold reader could start on",
+        "The agent offered to create a tracker instead of creating it unasked"
+      ]
+    },
+    {
+      "id": 2,
+      "name": "single-item-question",
+      "prompt": "is the refund job PR merged yet?",
+      "files": ["STATUS.md"],
+      "expected_output": "The agent checks only the refund-job row's PR live, updates that row in the tracker, and answers in a sentence or two without producing the full report.",
+      "assertions": [
+        "Only the refund job was checked",
+        "The answer quotes the live PR state",
+        "The full table and next-steps report was not produced",
+        "The tracker row was updated if its status changed"
+      ]
+    }
+  ]
+}
